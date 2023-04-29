@@ -58,7 +58,7 @@ void MsgpackParser::ParseData(DataStream& data_stream, const std::string& prefix
     const size_t array_size = format & 0x0F;
     for (size_t i = 0; i < array_size; i++) {
       // recursive
-      ParseData(data_stream, prefix + '.' + std::to_string(i), key_value);
+      ParseData(data_stream, prefix + '/' + std::to_string(i), key_value);
     }
   } else if ((format & 0xFF) == FormatType::FLOAT_64) {
     double val = data_stream.float64();
