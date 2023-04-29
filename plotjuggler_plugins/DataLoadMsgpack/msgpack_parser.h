@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <map>
+#include <unordered_map>
 
 #define FORMAT_TYPE_LEN 1
 
@@ -57,8 +57,17 @@ public:
       return offset < length;
     }
   };
+  struct Timeseries {
+    std::vector<uint64_t> timestamps;
+    std::unordered_map<std::string, std::vector<double>> data;
+  };
+
   MsgpackParser(char* data, size_t size);
+
+  const Timeseries& RefTimeseries();
+
+  void PrintTimeseries();
 private:
-  static void ParseData(DataStream& data_stream, const std::string& prefix, std::map<std::string, double>& key_value);
-  std::map<std::string, double> key_value_map_;
+  static void ParseData(DataStream& data_stream, const std::string& prefix, std::unordered_map<std::string, double>& key_value);
+    Timeseries time_series_;
 };

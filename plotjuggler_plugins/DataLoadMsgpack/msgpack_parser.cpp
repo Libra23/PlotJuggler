@@ -3,15 +3,41 @@
 MsgpackParser::MsgpackParser(char* data, size_t size) {
   DataStream data_stream(data, size);
 
-  //while(data_stream) {
-    ParseData(data_stream, "", key_value_map_);
-  //}
-  for (auto it = key_value_map_.cbegin(); it != key_value_map_.cend(); ++it) {
-    std::cout << "{" << (*it).first << ": " << (*it).second << "}\n";
+  int count = 0;
+  while(data_stream) {
+    // create key value map
+    std::unordered_map<std::string, double> key_value_map;
+    ParseData(data_stream, "", key_value_map);
+
+    // add to time_series for key & value
+    time_series_.timestamps.push_back(count);
+    for(auto itr = key_value_map.cbegin(); itr != key_value_map.cend(); itr++) {
+      const std::string& key = itr->first;
+      const double& val = itr->second;
+
+      const auto& time_series_itr = time_series_.data.find(key);
+      if( time_series_itr != time_series_.data.end() ) {
+        // if key is defined, add value
+        time_series_itr->second.push_back(val);
+      } else {
+        // if key is not defined, add key & value
+        time_series_.data[key].push_back(val);
+      }
+    }
+    count++;
   }
+  std::cout << "count : " << count << std::endl;
 }
 
-void MsgpackParser::ParseData(DataStream& data_stream, const std::string& prefix, std::map<std::string, double>& key_value) {
+const MsgpackParser::Timeseries& MsgpackParser::RefTimeseries() {
+  return time_series_;
+}
+
+void MsgpackParser::PrintTimeseries() {
+
+}
+
+void MsgpackParser::ParseData(DataStream& data_stream, const std::string& prefix, std::unordered_map<std::string, double>& key_value) {
   char format = *(data_stream.read(1));
   if ((format & 0x80) == FormatType::POSITIVE_FIX_INT) {
     double val = static_cast<double>(format);
