@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <map>
 
 #define FORMAT_TYPE_LEN 1
 
@@ -58,5 +59,6 @@ public:
   };
   MsgpackParser(char* data, size_t size);
 private:
-  void parseData(DataStream& data_stream);
+  static void ParseData(DataStream& data_stream, const std::string& prefix, std::map<std::string, double>& key_value);
+  std::map<std::string, double> key_value_map_;
 };

@@ -33,24 +33,6 @@ bool DataLoadMsgpack::readDataFromFile(FileLoadInfo* info, PlotDataMapRef& plot_
 
   MsgpackParser msg_parser(file_array.data(), file_array.size());
 
-  // convert binary to msgpack
-  #if 0
-  msgpack::unpacker unpkr;
-  unpkr.reserve_buffer(file_array.size());
-  memcpy(unpkr.buffer(), file_array.data(), file_array.size());
-  unpkr.buffer_consumed(file_array.size());
-
-  msgpack::object_handle oh;
-  while (unpkr.next(oh)) {
-    const msgpack::object& obj = oh.get();
-    if (obj.type == msgpack::type::ARRAY) {
-    //  array_count++;
-    //}
-    std::cout << obj << std::endl;
-  }
-  #endif
-
-
   QTextStream text_stream(&file);
 
   // The first line should contain the name of the columns
