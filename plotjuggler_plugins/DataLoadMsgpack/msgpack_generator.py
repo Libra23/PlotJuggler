@@ -2,6 +2,7 @@
 # python3 -m pip install msgpack
 
 import msgpack
+import math
 
 obj = {
     "timestamp" : 0,
@@ -28,13 +29,11 @@ obj = {
 }
 
 with open('msg.mpac', 'wb') as fd:
-    for i in range(10):
-        obj["timestamp"] = i
-        obj["right"]["arm"]["q"][0] = i
+    mm = 10
+    for i in range(mm * 60 * 1000):
+        obj["timestamp"] = i * 0.0001
+        obj["right"]["arm"]["q"][0] = math.sin(i * 0.0001)
         obj["right"]["hand"]["q"] = i * i
-        obj["left"]["arm"]["qd"][0] = i * 0.1
-        obj["left"]["hand"]["q"] = i * i * 0.1
+        obj["left"]["arm"]["qd"][0] = math.sin(i * i * 0.0001)
+        obj["left"]["hand"]["q"] = i * i * i
         fd.write(msgpack.packb(obj))
-
-for msg in msgpack.Unpacker(open('msg.mpac', 'rb')):
-    print(msg)

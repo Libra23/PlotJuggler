@@ -1,4 +1,5 @@
 #include "msgpack_parser.h"
+#include "msgpack_format.h"
 
 MsgpackParser::MsgpackParser(char* data, size_t size) {
   DataStream data_stream(data, size);
@@ -10,31 +11,24 @@ MsgpackParser::MsgpackParser(char* data, size_t size) {
     ParseData(data_stream, "", key_value_map);
 
     // add to time_series for key & value
-    time_series_.timestamps.push_back(count);
+    time_series_.timestamps.push_back(static_cast<double>(count));
     for(auto itr = key_value_map.cbegin(); itr != key_value_map.cend(); itr++) {
       const std::string& key = itr->first;
       const double& val = itr->second;
 
+      // if key is defined in map, add value
       const auto& time_series_itr = time_series_.data.find(key);
       if( time_series_itr != time_series_.data.end() ) {
-        // if key is defined, add value
         time_series_itr->second.push_back(val);
       } else {
-        // if key is not defined, add key & value
         time_series_.data[key].push_back(val);
       }
+
+      // add key
+      time_series_keys_.emplace(key);
     }
     count++;
   }
-  std::cout << "count : " << count << std::endl;
-}
-
-const MsgpackParser::Timeseries& MsgpackParser::RefTimeseries() {
-  return time_series_;
-}
-
-void MsgpackParser::PrintTimeseries() {
-
 }
 
 void MsgpackParser::ParseData(DataStream& data_stream, const std::string& prefix, std::unordered_map<std::string, double>& key_value) {
@@ -64,8 +58,24 @@ void MsgpackParser::ParseData(DataStream& data_stream, const std::string& prefix
     double val = data_stream.float64();
     // insert
     key_value.emplace(prefix, val);
+  } else if ((format & 0xFF) == FormatType::UINT_8) {
+    double val = static_cast<double>(data_stream.uint8());
+    // insert
+    key_value.emplace(prefix, val);
+  } else if ((format & 0xFF) == FormatType::UINT_16) {
+    double val = static_cast<double>(data_stream.uint16());
+    // insert
+    key_value.emplace(prefix, val);
+  } else if ((format & 0xFF) == FormatType::UINT_32) {
+    double val = static_cast<double>(data_stream.uint32());
+    // insert
+    key_value.emplace(prefix, val);
+  } else if ((format & 0xFF) == FormatType::UINT_64) {
+    double val = static_cast<double>(data_stream.uint64());
+    // insert
+    key_value.emplace(prefix, val);
   } else {
-    std::cout << "!!! undefined !!!" << std::endl;
+    std::cout << "!!! undefined !!! prefix : " << prefix << " byte : " << std::hex << (unsigned int)format << std::endl;
   }
 }
 

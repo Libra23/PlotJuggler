@@ -3,11 +3,16 @@
 #include <QObject>
 #include <QtPlugin>
 #include "PlotJuggler/dataloader_base.h"
+#include "ui_dataload_msgpack.h"
 
 using namespace PJ;
 
-class DataLoadMsgpack : public DataLoader
-{
+enum TimeIndex {
+  USE_ROW_AS_X_AXIS,
+  USE_SELECTED_AS_AXIS
+};
+
+class DataLoadMsgpack : public DataLoader {
   Q_OBJECT
   Q_PLUGIN_METADATA(IID "facontidavide.PlotJuggler3.DataLoader")
   Q_INTERFACES(PJ::DataLoader)
@@ -19,20 +24,15 @@ public:
   bool readDataFromFile(PJ::FileLoadInfo* fileload_info,
                         PlotDataMapRef& destination) override;
 
-  ~DataLoadMsgpack() override = default;
+  virtual ~DataLoadMsgpack();
 
-  virtual const char* name() const override
-  {
-    return "DataLoad Msgpack";
-  }
-
-
-protected:
-  QSize parseHeader(QFile* file, std::vector<std::string>& ordered_names);
+  virtual const char* name() const override { return "DataLoad Msgpack";}
 
 private:
-  std::vector<const char*> _extensions;
+  TimeIndex launchDialog(const std::unordered_set<std::string>& time_series_name_list, std::string& selected_timestamp_name);
 
-  std::string _default_time_axis;
+  std::vector<const char*> _extensions;
+  QDialog* _dialog;
+  Ui::DialogMsgpack* _ui;
 };
 
